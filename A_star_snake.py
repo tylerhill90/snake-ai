@@ -360,7 +360,6 @@ class Snake:
 
     def simple_move_snake(self, food):
         """Move the snake and grow its body after eating food."""
-
         head = self.body[0]
         tail = self.body[-1]
 
@@ -379,35 +378,7 @@ class Snake:
         valid_moves = []
         for move in sorted_moves.keys():
             if self.look_ahead(move):
-                valid_moves.append(move)
-
-        # Heuristic:
-        # See if the first two valid moves are tied in distance to the food
-        # If so move towards the tail
-        if len(valid_moves) >= 2:
-            if moves[valid_moves[0]] == moves[valid_moves[1]]:
-                # Calculate new head coordinates of moves
-                first_move_coord = tuple(map(sum, zip(valid_moves[0] + head)))
-                second_move_coord = tuple(map(sum, zip(valid_moves[1] + head)))
-                # Calculate head distance to tail
-                first_move_dist = self.calc_dist(first_move_coord, tail)
-                second_move_dist = self.calc_dist(second_move_coord, tail)
-                if first_move_dist < second_move_dist:
-                    self.direction = valid_moves[0]
-                else:
-                    self.direction = valid_moves[1]
-
-            # First 2 moves aren't tied for distance so chose the 1st
-            else:
-                self.direction = valid_moves[0]
-
-        # Only 1 valid move so chose that
-        elif len(valid_moves) == 1:
-            self.direction = valid_moves[0]
-
-        # No valid moves so just move anyway to end the game
-        else:
-            self.direction = (1, 0)
+                self.direction = move
 
         return
 
