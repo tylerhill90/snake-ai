@@ -89,7 +89,7 @@ class App:
                           ])
 
         # Draw the snake
-        for coord in self.snake.body_coords:
+        for coord in self.snake.body:
             pygame.draw.rect(self.screen, GREEN,
                              [(MARGIN + CELL) * coord[0] + MARGIN,
                               (MARGIN + CELL) * coord[1] + MARGIN,
@@ -151,14 +151,14 @@ class App:
         while True:
             coords = (randint(0, WIDTH - 1),
                       randint(0, HEIGHT - 1))
-            if coords not in self.snake.body_coords:
+            if coords not in self.snake.body:
                 break
 
         return coords
 
     def check_lose_conditions(self):
         """See if the game is over."""
-        head = self.snake.body_coords[0]
+        head = self.snake.body[0]
 
         # Check if snake is out of bounds
         if head[0] < 0 or head[0] == WIDTH:
@@ -168,7 +168,7 @@ class App:
             self.running = False
             return True
         # Check if snake hits itself
-        elif head in self.snake.body_coords[1:]:
+        elif head in self.snake.body[1:]:
             self.running = False
             return True
 
@@ -176,13 +176,13 @@ class App:
 
     def check_food_eaten(self):
         """See if the snake head collides with the food."""
-        head = self.snake.body_coords[0]
+        head = self.snake.body[0]
 
         if head == self.food:
             self.food = self.make_food()  # Make new food
             self.score += 1  # Increment score
             self.snake.adding_segment_countdowns.append(
-                len(self.snake.body_coords))
+                len(self.snake.body))
 
 
 class Snake:
@@ -190,7 +190,7 @@ class Snake:
 
     def __init__(self):
         # Start with three segments at center of screen
-        self.body_coords = [
+        self.body = [
             (WIDTH // 2,
              HEIGHT // 2),
             (WIDTH // 2 + 1,
@@ -228,8 +228,8 @@ class Snake:
         """Add a segment in the direction of motion and take one away from the
         tail unless the snake ate food."""
         # Move the snake forward by adding a segment in the direction of motion
-        self.body_coords.insert(
-            0, tuple(map(sum, zip(self.body_coords[0], self.direction))))
+        self.body.insert(
+            0, tuple(map(sum, zip(self.body[0], self.direction))))
 
         # Add a segment if food was eaten when it has passed the length of the
         # snake by counting down each instance of eating a food
@@ -240,7 +240,7 @@ class Snake:
 
             # Remove the trailing segment only if the countdown hasn't finished
             if self.adding_segment_countdowns[0] > 0:
-                self.body_coords.pop()
+                self.body.pop()
 
             # Get rid off finished countdowns
             if self.adding_segment_countdowns[0] == 0:
@@ -248,7 +248,7 @@ class Snake:
 
         # Remove the trailing segment if no countdowns
         else:
-            self.body_coords.pop()
+            self.body.pop()
 
 
 if __name__ == "__main__":
