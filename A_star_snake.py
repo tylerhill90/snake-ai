@@ -13,7 +13,7 @@ class A_star_snake(Simple_ai_snake):
 
     def __init__(self, width, height):
         super().__init__(width, height)
-        self.render_path = False
+        self.render_path = True
 
     def move_snake(self, food):
         """Move the snake."""
@@ -116,4 +116,4 @@ class A_star_snake(Simple_ai_snake):
         """Calculate the Manhattan distance between two points."""
         x1, y1 = p1
         x2, y2 = p2
-        return abs(x1-x2) + abs(y1 - y2)
+        return abs(x1 - x2) + abs(y1 - y2)

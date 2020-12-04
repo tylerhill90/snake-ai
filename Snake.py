@@ -22,16 +22,10 @@ class Snake(object):
         # Start with three segments at center of screen
         self.width = width
         self.height = height
-        self.body = [
-            (width // 2,
-             height // 2),
-            (width // 2 + 1,
-             height // 2),
-            (width // 2 + 2,
-             height // 2)
-        ]
-        # Start moving left
-        self.direction = (-1, 0)
+        self.body = [(width // 2,
+                      height // 2)]
+        # Start not moving
+        self.direction = (0, 0)
         # Init an empty list to countdown when to add segments
         self.adding_segment_countdowns = []
 
@@ -59,25 +53,26 @@ class Snake(object):
     def update_body(self):
         """Add a segment in the direction of motion and take one away from the
         tail unless the snake ate food."""
-        # Move the snake forward by adding a segment in the direction of motion
-        self.body.insert(
-            0, tuple(map(sum, zip(self.body[0], self.direction))))
+        if self.direction != (0, 0):
+            # Move the snake forward by adding a segment in the direction of motion
+            self.body.insert(
+                0, tuple(map(sum, zip(self.body[0], self.direction))))
 
-        # Add a segment if food was eaten when it has passed the length of the
-        # snake by counting down each instance of eating a food
-        if len(self.adding_segment_countdowns) > 0:
-            # Decrement each of the countdowns
-            self.adding_segment_countdowns = [
-                x - 1 for x in self.adding_segment_countdowns]
+            # Add a segment if food was eaten when it has passed the length of the
+            # snake by counting down each instance of eating a food
+            if len(self.adding_segment_countdowns) > 0:
+                # Decrement each of the countdowns
+                self.adding_segment_countdowns = [
+                    x - 1 for x in self.adding_segment_countdowns]
 
-            # Remove the trailing segment only if the countdown hasn't finished
-            if self.adding_segment_countdowns[0] > 0:
+                # Remove the trailing segment only if the countdown hasn't finished
+                if self.adding_segment_countdowns[0] > 0:
+                    self.body.pop()
+
+                # Get rid off finished countdowns
+                if self.adding_segment_countdowns[0] == 0:
+                    self.adding_segment_countdowns.pop(0)
+
+            # Remove the trailing segment if no countdowns
+            else:
                 self.body.pop()
-
-            # Get rid off finished countdowns
-            if self.adding_segment_countdowns[0] == 0:
-                self.adding_segment_countdowns.pop(0)
-
-        # Remove the trailing segment if no countdowns
-        else:
-            self.body.pop()

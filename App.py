@@ -32,6 +32,7 @@ BLACK = (0, 0, 0)
 GREY = (200, 200, 200)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 PURPLE = (147, 132, 240)
 
 
@@ -100,15 +101,9 @@ class App:
                     count += 1
                     # Shade each cell of the path based on the cell's distance in
                     # the path
-                    shade = tuple(x - 4 * count for x in PURPLE)
-                    faded = False
-                    for val in shade:
-                        if val <= 0:
-                            faded = True
-                    if not faded:
-                        self.render_cell(shade, coord)
-                    else:
-                        self.render_cell(BLACK, coord)
+                    shade = tuple(
+                        x - 4 * count if x > 4 * count else 0 for x in PURPLE)
+                    self.render_cell(shade, coord)
 
         # Draw the food
         self.render_cell(RED, self.food)
@@ -226,5 +221,5 @@ class App:
 
 
 if __name__ == "__main__":
-    game = App(Snake(WIDTH, HEIGHT))
+    game = App(A_star_snake(WIDTH, HEIGHT))
     game.on_execute()
