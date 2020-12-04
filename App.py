@@ -221,5 +221,7 @@ class App:
 
 
 if __name__ == "__main__":
-    game = App(A_star_snake(WIDTH, HEIGHT))
+    game = App(Snake(WIDTH, HEIGHT))
+    # game = App(Simple_ai_snake(WIDTH, HEIGHT))
+    # game = App(A_star_snake(WIDTH, HEIGHT))
     game.on_execute()
