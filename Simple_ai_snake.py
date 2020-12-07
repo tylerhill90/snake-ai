@@ -15,6 +15,10 @@ class Simple_ai_snake(Snake):
 
     def __init__(self, width, height):
         super().__init__(width, height)
+        self.boundaries = [(col, -1) for col in range(self.width)] + \
+            [(col, self.height) for col in range(self.width)] + \
+            [(-1, row) for row in range(self.height)] + \
+            [(self.width, row) for row in range(self.height)]
 
     def move_snake(self, food):
         """Move the snake and grow its body after eating food."""
@@ -50,12 +54,8 @@ class Simple_ai_snake(Snake):
     def look_ahead(self, direction):
         """Look ahead one space in a direction to see if it is a valid move."""
         head = self.body[0]
-        move = (head[0] + direction[0], head[1] + direction[1])
-        if move in self.body:
-            return False
-        elif move[0] < 0 or move[0] == self.width:
-            return False
-        elif move[1] < 0 or move[1] == self.height:
+        move = tuple(map(sum, zip(head, direction)))
+        if move in self.body or move in self.boundaries:
             return False
         else:
             return True

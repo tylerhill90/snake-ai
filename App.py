@@ -18,6 +18,7 @@ from pygame.locals import (
 from Snake import Snake
 from Simple_ai_snake import Simple_ai_snake
 from A_star_snake import A_star_snake
+from Neat_snake import Neat_snake
 
 # Define global constants
 CELL = 20
@@ -31,6 +32,7 @@ SCREEN_HEIGHT = HEIGHT * CELL + (MARGIN * HEIGHT + 1)
 BLACK = (0, 0, 0)
 GREY = (200, 200, 200)
 GREEN = (0, 255, 0)
+DARK_GREEN = (0, 200, 75)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 PURPLE = (147, 132, 240)
@@ -39,7 +41,7 @@ PURPLE = (147, 132, 240)
 class App:
     """Class to house the game."""
 
-    def __init__(self, snake, frame_rate=100):
+    def __init__(self, snake, frame_rate=0):
         pygame.init()
         self.running = True
         self.screen = pygame.display.set_mode((
@@ -77,9 +79,10 @@ class App:
             return
         self.check_food_eaten()
 
-        # Move the snake
+        # Move the snake for AI
         if isinstance(self.snake, Simple_ai_snake):
             self.snake.move_snake(self.food)
+        # Move the snake for a player
         else:
             self.snake.move_snake(pygame.key.get_pressed())
 
@@ -111,6 +114,9 @@ class App:
         # Draw the snake
         for coord in self.snake.body:
             self.render_cell(GREEN, coord)
+
+        # Draw the head of the snake
+        self.render_cell(DARK_GREEN, self.snake.body[0])
 
         # Draw the scoreboard
         pygame.draw.rect(self.screen, GREY,
@@ -158,6 +164,7 @@ class App:
             if not self.running:
                 break
             self.on_render()
+        # pygame.time.delay(3000)
         self.on_cleanup()
 
     def get_high_score(self):
@@ -221,7 +228,8 @@ class App:
 
 
 if __name__ == "__main__":
-    game = App(Snake(WIDTH, HEIGHT))
+    # game = App(Snake(WIDTH, HEIGHT))
     # game = App(Simple_ai_snake(WIDTH, HEIGHT))
-    # game = App(A_star_snake(WIDTH, HEIGHT))
+    game = App(A_star_snake(WIDTH, HEIGHT))
+    # game = App(Neat_snake(WIDTH, HEIGHT))
     game.on_execute()

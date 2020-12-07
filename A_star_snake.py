@@ -75,18 +75,16 @@ class A_star_snake(Simple_ai_snake):
 
         move = self.simple_move_snake(food)
         self.path = []
-        self.path.append(
-            tuple(map(sum, zip(head, self.direction))))
         return
 
     def get_neighbors(self, coord):
         neighbors = []
         row, col = coord
-        # Up
+        # Down
         if row < self.width - 1 and (row + 1, col) not in self.body:
             neighbors.append((row + 1, col))
 
-        # Down
+        # Up
         if row > 0 and (row - 1, col) not in self.body:
             neighbors.append((row - 1, col))
 

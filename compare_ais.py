@@ -12,19 +12,6 @@ WIDTH = 50
 HEIGHT = 35
 
 
-def run_trials(name, snake, trials):
-    scores = []
-    count = 0
-    for x in range(trials):
-        count += 1
-        print(f"{name} Game: {count}")
-        game = App(snake, frame_rate=0)
-        game.on_execute()
-        scores.append(game.score)
-
-    return scores
-
-
 def make_plot(name, trials, scores):
     plt.hist(scores, bins='auto')
     plt.title(f"{name} AI Scores in {trials} games")
@@ -37,14 +24,14 @@ def make_plot(name, trials, scores):
 def main():
     trials = 30
 
-    simple_scores = run_trials(
-        "Simple", Simple_ai_snake(WIDTH, HEIGHT), trials)
-    with open("simple_scores.csv", "w") as f_a:
-        write = csv.writer(f_a)
-        write.writerow(simple_scores)
+    a_star_scores = []
+    for x in range(trials):
+        print(f"Simple Game: {x + 1}")
+        game = App(A_star_snake(WIDTH, HEIGHT), frame_rate=0)
+        game.on_execute()
+        a_star_scores.append(game.score)
+        print(f"SCORE: {game.score}")
 
-    a_star_scores = run_trials(
-        "A*", A_star_snake(WIDTH, HEIGHT), trials)
     with open("a_star_scores.csv", "w") as f_a:
         write = csv.writer(f_a)
         write.writerow(a_star_scores)

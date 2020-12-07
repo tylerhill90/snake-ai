@@ -15,7 +15,7 @@ from pygame.locals import (
 )
 
 
-class Snake(object):
+class Snake:
     """A class to house the snake."""
 
     def __init__(self, width, height):
