@@ -32,11 +32,10 @@ def main():
         a_star_scores.append(game.score)
         print(f"SCORE: {game.score}")
 
-    with open("a_star_scores.csv", "w") as f_a:
+    """with open("a_star_scores.csv", "w") as f_a:
         write = csv.writer(f_a)
-        write.writerow(a_star_scores)
+        write.writerow(a_star_scores)"""
 
-    make_plot("Simple", trials, simple_scores)
     make_plot("A*", trials, a_star_scores)
 
 

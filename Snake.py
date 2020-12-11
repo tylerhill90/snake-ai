@@ -2,6 +2,7 @@
 
 """A game of classic snake."""
 
+from random import randint
 import pygame
 from pygame.locals import (
     KEYDOWN,
@@ -24,10 +25,33 @@ class Snake:
         self.height = height
         self.body = [(width // 2,
                       height // 2)]
+        self.food = self.make_food()
+        self.score = 0
         # Start not moving
         self.direction = (0, 0)
         # Init an empty list to countdown when to add segments
         self.adding_segment_countdowns = []
+
+        self.board = [(row, col) for row in range(self.width) for col in range(self.height)]
+
+    def make_food(self):
+        """Make a snake snack! Place only where snake isn't."""
+        while True:
+            coords = (randint(0, self.width - 1),
+                      randint(0, self.height - 1))
+            if coords not in self.body:
+                break
+
+        return coords
+
+    def check_food_eaten(self):
+        """See if the snake head collides with the food."""
+        head = self.body[0]
+
+        if head == self.food:
+            self.food = self.make_food()  # Make new food
+            self.score += 1  # Increment score
+            self.adding_segment_countdowns.append(len(self.body))
 
     def move_snake(self, pressed_keys):
         """Move the snake."""

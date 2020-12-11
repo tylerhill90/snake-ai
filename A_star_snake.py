@@ -15,7 +15,7 @@ class A_star_snake(Simple_ai_snake):
         super().__init__(width, height)
         self.render_path = True
 
-    def move_snake(self, food):
+    def move_snake(self):
         """Move the snake."""
         head = self.body[0]
         board = self.make_board()
@@ -26,7 +26,7 @@ class A_star_snake(Simple_ai_snake):
         g_score = {coord: float("inf") for row in board for coord in row}
         g_score[head] = 0
         f_score = {coord: float("inf") for row in board for coord in row}
-        f_score[head] = self.h(head, food)
+        f_score[head] = self.h(head, self.food)
 
         open_set_hash = {head}
 
@@ -37,7 +37,7 @@ class A_star_snake(Simple_ai_snake):
             open_set_hash.remove(current)
 
             # Handle finding the shortest path
-            if current == food:
+            if current == self.food:
                 # Create a list of the coordinates in the path
                 self.path = []
                 while current in came_from:
@@ -62,7 +62,7 @@ class A_star_snake(Simple_ai_snake):
                         came_from[neighbor] = current
                         g_score[neighbor] = temp_g_score
                         f_score[neighbor] = temp_g_score + \
-                            self.h(neighbor, food)
+                            self.h(neighbor, self.food)
                         if neighbor not in open_set_hash:
                             count += 1
                             open_set.put((f_score[neighbor], count, neighbor))
@@ -73,7 +73,7 @@ class A_star_snake(Simple_ai_snake):
                     print("Head:", head)
                     continue
 
-        move = self.simple_move_snake(food)
+        move = self.simple_move_snake()
         self.path = []
         return
 
@@ -98,8 +98,8 @@ class A_star_snake(Simple_ai_snake):
 
         return neighbors
 
-    def simple_move_snake(self, food):
-        super().move_snake(food)
+    def simple_move_snake(self):
+        super().move_snake()
 
     def make_board(self):
         board = []

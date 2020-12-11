@@ -3,7 +3,6 @@
 """A game of classic snake."""
 
 import sys
-from random import randint
 import pygame
 from pygame.locals import (
     KEYDOWN,
@@ -52,8 +51,6 @@ class App:
             self.frame_rate = frame_rate
         else:
             self.frame_rate = 7
-        self.food = self.make_food()
-        self.score = 0
         self.font = pygame.font.SysFont(None, 36)
         self.high_score = self.get_high_score()
 
@@ -68,7 +65,7 @@ class App:
             # Was it the Escape key? If so, then stop the loop.
             if event.key == K_ESCAPE:
                 self.running = False
-            # Pause the game
+            # Render A* snake vision
             if isinstance(self.snake, A_star_snake):
                 if event.key == K_SPACE:
                     self.snake.render_path = not self.snake.render_path
@@ -77,11 +74,11 @@ class App:
         """Handle game logic each game loop."""
         if self.check_lose_conditions():
             return
-        self.check_food_eaten()
+        self.snake.check_food_eaten()
 
         # Move the snake for AI
         if isinstance(self.snake, Simple_ai_snake):
-            self.snake.move_snake(self.food)
+            self.snake.move_snake()
         # Move the snake for a player
         else:
             self.snake.move_snake(pygame.key.get_pressed())
@@ -109,7 +106,7 @@ class App:
                     self.render_cell(shade, coord)
 
         # Draw the food
-        self.render_cell(RED, self.food)
+        self.render_cell(RED, self.snake.food)
 
         # Draw the snake
         for coord in self.snake.body:
@@ -123,16 +120,16 @@ class App:
                          [0,
                           (MARGIN + CELL) * HEIGHT + MARGIN,
                           (MARGIN + CELL) * WIDTH + MARGIN,
-                          (MARGIN + CELL) * HEIGHT + MARGIN + SCORE_BOARD
+                          SCORE_BOARD
                           ])
 
-        current_score = self.font.render(f"Score: {self.score}", True, BLACK)
-        if self.score < self.high_score:
+        current_score = self.font.render(f"Score: {self.snake.score}", True, BLACK)
+        if self.snake.score < self.high_score:
             high_score = self.font.render(
                 f"High Score: {self.high_score}", True, BLACK)
         else:
             high_score = self.font.render(
-                f"High Score: {self.score}", True, BLACK)
+                f"High Score: {self.snake.score}", True, BLACK)
         self.screen.blit(current_score, (5, (MARGIN + CELL)
                                          * HEIGHT + MARGIN + 5))
 
@@ -146,9 +143,9 @@ class App:
     def on_cleanup(self):
         """Exit the game."""
         # Update the high score if necessary
-        if self.score > self.high_score:
+        if self.snake.score > self.high_score:
             with open("high_score_a_star.txt", 'w') as file:
-                file.write(f"{self.score}")
+                file.write(f"{self.snake.score}")
         # Exit pygame without errors
         for evt in pygame.event.get():
             if evt.type == pygame.QUIT:
@@ -179,16 +176,6 @@ class App:
 
         return high_score
 
-    def make_food(self):
-        """Make a snake snack! Place only where snake isn't."""
-        while True:
-            coords = (randint(0, WIDTH - 1),
-                      randint(0, HEIGHT - 1))
-            if coords not in self.snake.body:
-                break
-
-        return coords
-
     def check_lose_conditions(self):
         """See if the game is over."""
         head = self.snake.body[0]
@@ -206,16 +193,6 @@ class App:
             return True
 
         return False
-
-    def check_food_eaten(self):
-        """See if the snake head collides with the food."""
-        head = self.snake.body[0]
-
-        if head == self.food:
-            self.food = self.make_food()  # Make new food
-            self.score += 1  # Increment score
-            self.snake.adding_segment_countdowns.append(
-                len(self.snake.body))
 
     def render_cell(self, color, coord):
         """Render a single cell of the game board."""
