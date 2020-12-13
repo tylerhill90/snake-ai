@@ -14,10 +14,10 @@ from pygame.locals import (
     K_ESCAPE,
     QUIT
 )
-from Snake import Snake
-from Simple_ai_snake import Simple_ai_snake
-from A_star_snake import A_star_snake
-from Neat_snake import Neat_snake
+from snakes.Snake import Snake
+from snakes.Simple_ai_snake import Simple_ai_snake
+from snakes.A_star_snake import A_star_snake
+from snakes.Neat_snake import Neat_snake
 
 # Define global constants
 CELL = 20
@@ -123,7 +123,8 @@ class App:
                           SCORE_BOARD
                           ])
 
-        current_score = self.font.render(f"Score: {self.snake.score}", True, BLACK)
+        current_score = self.font.render(
+            f"Score: {self.snake.score}", True, BLACK)
         if self.snake.score < self.high_score:
             high_score = self.font.render(
                 f"High Score: {self.high_score}", True, BLACK)
@@ -166,11 +167,11 @@ class App:
 
     def get_high_score(self):
         if isinstance(self.snake, A_star_snake):
-            high_score_file = "high_score_a_star.txt"
+            high_score_file = "high_scores/high_score_a_star.txt"
         elif isinstance(self.snake, Simple_ai_snake):
-            high_score_file = "high_score_simple.txt"
+            high_score_file = "high_scores/high_score_simple.txt"
         else:
-            high_score_file = "high_score.txt"
+            high_score_file = "high_scores/high_score.txt"
         with open(high_score_file, 'r') as file:
             high_score = int(file.readline())
 

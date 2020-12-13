@@ -3,7 +3,7 @@
 
 from math import sqrt
 
-from Snake import Snake
+from .Snake import Snake
 
 
 class Simple_ai_snake(Snake):

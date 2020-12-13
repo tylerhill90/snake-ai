@@ -5,7 +5,7 @@
 from math import sqrt
 from queue import PriorityQueue
 
-from Simple_ai_snake import Simple_ai_snake
+from .Simple_ai_snake import Simple_ai_snake
 
 
 class A_star_snake(Simple_ai_snake):
@@ -67,12 +67,14 @@ class A_star_snake(Simple_ai_snake):
                             count += 1
                             open_set.put((f_score[neighbor], count, neighbor))
                             open_set_hash.add(neighbor)
+                # Handle edges cases without crashing
                 except KeyError:
                     print("KEY ERROR")
                     print("Neighbor:", neighbor)
                     print("Head:", head)
                     continue
 
+        # No path found so just move simply
         move = self.simple_move_snake()
         self.path = []
         return

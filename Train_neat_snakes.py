@@ -6,6 +6,7 @@ import sys
 import os
 from random import randint
 import neat
+import pickle
 import pygame
 from pygame.locals import (
     KEYDOWN,
@@ -17,15 +18,13 @@ from pygame.locals import (
     K_ESCAPE,
     QUIT
 )
-from Simple_ai_snake import Simple_ai_snake
-from A_star_snake import A_star_snake
-from Neat_snake import Neat_snake
+from snakes.Neat_snake import Neat_snake
 
 # Define global constants
 CELL = 7
 MARGIN = 1
-WIDTH = 20
-HEIGHT = 20
+WIDTH = 50
+HEIGHT = 35
 SCORE_BOARD = 35
 SCREEN_WIDTH = (WIDTH * CELL + (MARGIN * WIDTH + 1))
 SCREEN_HEIGHT = (HEIGHT * CELL + (MARGIN * HEIGHT + 1)) + SCORE_BOARD
@@ -46,17 +45,18 @@ class Training_app:
         pygame.init()
         self.running = True
         self.render_vision = False
-        self.frame = 0
         self.screen = pygame.display.set_mode((
             SCREEN_WIDTH * 4, SCREEN_HEIGHT * 3
         ))
+
+        self.config = config
 
         self.den = []
         self.nets = []
         self.ge = []
 
         for _, g in genomes:
-            net = neat.nn.FeedForwardNetwork.create(g, config)
+            net = neat.nn.feed_forward.FeedForwardNetwork.create(g, config)
             self.nets.append(net)
             self.den.append(Neat_snake(WIDTH, HEIGHT))
             g.fitness = 0
@@ -84,26 +84,48 @@ class Training_app:
         """Handle game logic each game loop."""
 
         for x, snake in enumerate(self.den):
-            if snake.starvation >= 80:
-                snake.direction = (0, 0)
-                snake.alive = False
             if snake.alive:
+                # Move the snake
+                head_1 = snake.body[0]
+                snake.move_snake(self.nets[x])
+                snake.update_body()
+                head_2 = snake.body[0]
+
+                # Increase fitness if closer to food and decrease otherwise
+                if snake.calc_dist(head_1, snake.food) < snake.calc_dist(head_1, snake.food):
+                    self.ge[x].fitness += 0.01
+                else:
+                    self.ge[x].fitness -= 0.015
+
+                if snake.hunger >= len(snake.body) * 75:
+                        snake.direction = (0, 0)
+                        snake.alive = False
+                        self.ge[x].fitness -= 100 / len(snake.body)
+                        continue
+
+                # Decrease fitness if stuck in a loop
+                if snake.body[0] in snake.path:
+                    snake.time_loop += 1
+                    if snake.time_loop == len(snake.path):
+                        self.ge[x].fitness -= 2
+                        snake.time_loop = 0
+                        snake.path = set()
+                snake.path.add(snake.body[0])
+
+                # Check lose conditions
                 if self.check_lose_conditions(snake):
                     snake.direction = (0, 0)
                     snake.alive = False
-                    self.ge[x].fitness -= 20
+                    self.ge[x].fitness -= 100 / len(snake.body)
                     continue
 
                 if snake.check_food_eaten():
-                    self.ge[x].fitness += 5
-
-                # Move the snake for AI
-                snake.move_snake(self.nets[x])
-                snake.update_body()
+                    snake.hunger = 0
+                    self.ge[x].fitness += 100 / len(snake.body)
 
         # Check if all snakes are dead
         dead = sum([1 for snake in self.den if not snake.alive])
-        if dead == 100:
+        if dead == len(self.den):
             self.running = False
 
         # Ensure a human playable frame rate
@@ -121,23 +143,31 @@ class Training_app:
 
     def on_render(self):
         """Render the screen each game loop."""
+        genomes_fitnesses = [(x, genome.fitness)
+                             for x, genome in enumerate(self.ge)]
+        best_fitnesses = sorted(genomes_fitnesses, key=lambda i: i[1], reverse=True)[:12]
+
+        best_snakes = [x[0] for x in best_fitnesses]
+
         # Draw a black background
         self.screen.fill(BLACK)
 
-        for game, snake in enumerate(self.den, start=1):
-            if game < 13:
-                if game < 5:
+        count = 0
+        for game, snake in enumerate(self.den):
+            if game in best_snakes:
+                count += 1
+                if count < 5:
                     row = 0
-                elif 4 < game < 9:
+                elif 4 < count < 9:
                     row = 1
                 else:
                     row = 2
 
-                if game in [1, 5, 9]:
+                if count in [1, 5, 9]:
                     col = 0
-                elif game in [2, 6, 10]:
+                elif count in [2, 6, 10]:
                     col = 1
-                elif game in [3, 7, 11]:
+                elif count in [3, 7, 11]:
                     col = 2
                 else:
                     col = 3
@@ -162,12 +192,12 @@ class Training_app:
 
                 # Draw the scoreboard background
                 pygame.draw.rect(self.screen, GREY,
-                                [0 + col * SCREEN_WIDTH,
-                                ((MARGIN + CELL) * HEIGHT + MARGIN) +
-                                row * SCREEN_HEIGHT,
-                                ((MARGIN + CELL) * WIDTH + MARGIN),
-                                SCORE_BOARD
-                                ])
+                                 [0 + col * SCREEN_WIDTH,
+                                  ((MARGIN + CELL) * HEIGHT + MARGIN) +
+                                  row * SCREEN_HEIGHT,
+                                  ((MARGIN + CELL) * WIDTH + MARGIN),
+                                  SCORE_BOARD
+                                  ])
 
                 # Store text for scores
                 current_score = self.font.render(
@@ -181,10 +211,10 @@ class Training_app:
 
                 # Draw Scores
                 self.screen.blit(current_score, (5 + col * SCREEN_WIDTH,
-                                                (MARGIN + CELL) * HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
+                                                 (MARGIN + CELL) * HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
                 self.screen.blit(high_score, ((((MARGIN + CELL) * WIDTH +
                                                 MARGIN) // 2) + col * SCREEN_WIDTH, (MARGIN + CELL) *
-                                            HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
+                                              HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
 
         # Display the screen
         pygame.display.flip()
@@ -201,10 +231,21 @@ class Training_app:
 
     def on_cleanup(self):
         """Exit the game."""
+        """max_fit = -100
+        best_genome = 0
+        for x, genome in enumerate(self.ge):
+            if genome.fitness > max_fit:
+                max_fit = genome.fitness
+                best_genome = x
+
+        print(best_genome, max_fit)
+
+        visualize.draw_net(self.config, self.ge[best_genome], view=True)"""
+
         # Update the high score if necessary
         for snake in self.den:
             if snake.score > self.high_score:
-                with open("neat_high_score.txt", 'w') as file:
+                with open("high_score_neat.txt", 'w') as file:
                     file.write(f"{snake.score}")
         # Exit pygame without errors
         for evt in pygame.event.get():
@@ -216,7 +257,6 @@ class Training_app:
         """Start the game loop."""
 
         while self.running:
-            self.frame += 1
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_loop()
@@ -226,15 +266,19 @@ class Training_app:
         self.on_cleanup()
 
     def get_high_score(self):
-        high_score_file = "neat_high_score.txt"
+        high_score_file = "high_scores/high_score_neat.txt"
         with open(high_score_file, 'r') as file:
             high_score = int(file.readline())
 
         return high_score
 
+def save_object(obj, filename):
+    with open(filename, 'wb') as output:
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+
 
 def eval_genomes(genomes, config):
-    return Training_app(genomes, config, frame_rate=10).on_execute()
+    return Training_app(genomes, config).on_execute()
 
 
 def run(config_path):
@@ -242,13 +286,17 @@ def run(config_path):
                                 neat.DefaultSpeciesSet, neat.DefaultStagnation,
                                 config_path)
 
-    p = neat.Population(config)
+    p = neat.population.Population(config)
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
     winner = p.run(eval_genomes, 300)
+
+    save_object(winner, "neat_snake_2.pickle")
+
+    visualize.draw_net(config, winner, view=True)
 
 
 if __name__ == "__main__":
