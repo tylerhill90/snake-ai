@@ -91,11 +91,15 @@ class Training_app:
                 snake.update_body()
                 head_2 = snake.body[0]
 
-                # Increase fitness if closer to food and decrease otherwise
+                """# Increase fitness if closer to food and decrease otherwise
                 if snake.calc_dist(head_1, snake.food) < snake.calc_dist(head_1, snake.food):
                     self.ge[x].fitness += 0.01
                 else:
-                    self.ge[x].fitness -= 0.015
+                    self.ge[x].fitness -= 0.015"""
+
+                """# Decrease fitness if head is near the edge of board
+                if 0 in head_2 or snake.width in head_2 or snake.height in head_2:
+                    self.ge[x].fitness -= 0.1"""
 
                 if snake.hunger >= len(snake.body) * 75:
                         snake.direction = (0, 0)
@@ -104,13 +108,13 @@ class Training_app:
                         continue
 
                 # Decrease fitness if stuck in a loop
-                if snake.body[0] in snake.path:
+                """if snake.body[0] in snake.path:
                     snake.time_loop += 1
                     if snake.time_loop == len(snake.path):
                         self.ge[x].fitness -= 2
                         snake.time_loop = 0
                         snake.path = set()
-                snake.path.add(snake.body[0])
+                snake.path.add(snake.body[0])"""
 
                 # Check lose conditions
                 if self.check_lose_conditions(snake):
@@ -120,8 +124,8 @@ class Training_app:
                     continue
 
                 if snake.check_food_eaten():
+                    self.ge[x].fitness += (100 / len(snake.body)) - snake.hunger
                     snake.hunger = 0
-                    self.ge[x].fitness += 100 / len(snake.body)
 
         # Check if all snakes are dead
         dead = sum([1 for snake in self.den if not snake.alive])
@@ -231,17 +235,6 @@ class Training_app:
 
     def on_cleanup(self):
         """Exit the game."""
-        """max_fit = -100
-        best_genome = 0
-        for x, genome in enumerate(self.ge):
-            if genome.fitness > max_fit:
-                max_fit = genome.fitness
-                best_genome = x
-
-        print(best_genome, max_fit)
-
-        visualize.draw_net(self.config, self.ge[best_genome], view=True)"""
-
         # Update the high score if necessary
         for snake in self.den:
             if snake.score > self.high_score:
@@ -292,7 +285,7 @@ def run(config_path):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    winner = p.run(eval_genomes, 300)
+    winner = p.run(eval_genomes, 100)
 
     save_object(winner, "neat_snake_2.pickle")
 

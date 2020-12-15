@@ -96,7 +96,31 @@ class Neat_snake(Simple_ai_snake):
             else:
                 directions_barrier[direction] = 1- (distance / self.height)
 
-        return list(directions_barrier.values()) + list(directions_food.values())
+        # Report the direction of the snake
+        directions_snake = {
+            (-1, 0): 0,
+            (0, 1): 0,
+            (1, 0): 0,
+            (0, -1): 0
+        }
+        for direction in directions_snake.keys():
+            if self.direction == direction:
+                directions_snake[direction] = 1
+                break
+
+        # Report the direction(s) of the food relative to the head
+        """directions_food = {
+            (-1, 0): 0,
+            (0, 1): 0,
+            (1, 0): 0,
+            (0, -1): 0
+        }
+        for direction in directions_food.keys():
+            if self.food == direction:
+                directions_food[direction] = 1"""
+                
+
+        return list(directions_barrier.values()) + list(directions_food.values()) + list(directions_snake.values())
 
     def check_food_eaten(self):
         """See if the snake head collides with the food."""

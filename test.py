@@ -5,7 +5,6 @@ import os
 from random import randint
 import neat
 import pickle
-from neatlib import visualize
 import pygame
 from pygame.locals import (
     KEYDOWN,
@@ -17,7 +16,7 @@ from pygame.locals import (
     K_ESCAPE,
     QUIT
 )
-from Neat_snake import Neat_snake
+from snakes.Neat_snake import Neat_snake
 
 # Define global constants
 CELL = 7
@@ -258,13 +257,13 @@ class Training_app:
         self.on_cleanup()
 
     def get_high_score(self):
-        high_score_file = "neat_high_score.txt"
+        high_score_file = "high_scores/high_score_neat.txt"
         with open(high_score_file, 'r') as file:
             high_score = int(file.readline())
 
         return high_score
 
-def replay_genome(config_path, genome_path="neat_snake.pickle"):
+def replay_genome(config_path, genome_path="neat_snake_2.pickle"):
     # Load requried NEAT config
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                 neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
