@@ -28,7 +28,9 @@ class Neat_snake(Simple_ai_snake):
         # Move left
         elif output[2] == max(output):
             self.direction = (self.direction[1], self.direction[0])
-        # Else keep moving in the current direction
+        # Move straight
+        else:
+            pass
 
     def get_input(self):
         right = (-1 * self.direction[1], -1 * self.direction[0])
@@ -76,7 +78,6 @@ class Neat_snake(Simple_ai_snake):
             pointer = self.body[0]
             while True:
                 if sum(directions_food.values()) == 0:
-                    count += 1
                     look_at = tuple(map(sum, zip(direction, pointer)))
                     pointer = look_at
                     if look_at == self.food:
@@ -87,6 +88,18 @@ class Neat_snake(Simple_ai_snake):
                 else:
                     break
 
+        directions_warning = {
+            right: 0,
+            diag_right: 0,
+            forward: 0,
+            diag_left: 0,
+            left: 0
+        }
+        for direction in directions_warning:
+            look_at = tuple(map(sum, zip(direction, self.body[0])))
+            if look_at in self.body or look_at not in self.board:
+                directions_warning[direction] = 1
+
         # Normalize the barrier data and take the inverse
         for direction, distance in directions_barrier.items():
             # Looking left or right
@@ -94,7 +107,7 @@ class Neat_snake(Simple_ai_snake):
                 directions_barrier[direction] = 1 - (distance / self.width)
             # Looking up or down
             else:
-                directions_barrier[direction] = 1- (distance / self.height)
+                directions_barrier[direction] = 1 - (distance / self.height)
 
         # Report the direction of the snake
         directions_snake = {
@@ -109,18 +122,29 @@ class Neat_snake(Simple_ai_snake):
                 break
 
         # Report the direction(s) of the food relative to the head
-        """directions_food = {
-            (-1, 0): 0,
-            (0, 1): 0,
-            (1, 0): 0,
-            (0, -1): 0
-        }
-        for direction in directions_food.keys():
-            if self.food == direction:
-                directions_food[direction] = 1"""
-                
+        moving_to_food = None
+        if self.direction in [right, left]:
+            sign_delta = self.food[0] - self.body[0][0]
+            if self.direction[0] * sign_delta > 0:
+                moving_to_food = 1
+            else:
+                moving_to_food = 0
+        else:
+            sign_delta = self.food[1] - self.body[0][1]
+            if self.direction[1] * sign_delta > 0:
+                moving_to_food = 1
+            else:
+                moving_to_food = 0
 
-        return list(directions_barrier.values()) + list(directions_food.values()) + list(directions_snake.values())
+        # Order inputs so the info for vision directions are side by side
+        inputs = []
+        for i in zip(list(directions_barrier.values()), list(directions_food.values()), list(directions_warning.values())):
+            inputs.append(i[0])
+            inputs.append(i[1])
+            inputs.append(i[2])
+        inputs = inputs + list(directions_snake.values()) + [moving_to_food]
+
+        return inputs
 
     def check_food_eaten(self):
         """See if the snake head collides with the food."""

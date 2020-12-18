@@ -101,14 +101,15 @@ class Training_app:
                 if 0 in head_2 or snake.width in head_2 or snake.height in head_2:
                     self.ge[x].fitness -= 0.1"""
 
+                # Check if snake starves and decrease fitness if so
                 if snake.hunger >= len(snake.body) * 75:
-                        snake.direction = (0, 0)
-                        snake.alive = False
-                        self.ge[x].fitness -= 100 / len(snake.body)
-                        continue
+                    snake.direction = (0, 0)
+                    snake.alive = False
+                    self.ge[x].fitness -= 100 / len(snake.body)
+                    continue
 
-                # Decrease fitness if stuck in a loop
-                """if snake.body[0] in snake.path:
+                """# Decrease fitness if stuck in a loop
+                if snake.body[0] in snake.path:
                     snake.time_loop += 1
                     if snake.time_loop == len(snake.path):
                         self.ge[x].fitness -= 2
@@ -124,7 +125,7 @@ class Training_app:
                     continue
 
                 if snake.check_food_eaten():
-                    self.ge[x].fitness += (100 / len(snake.body)) - snake.hunger
+                    self.ge[x].fitness += 10
                     snake.hunger = 0
 
         # Check if all snakes are dead
@@ -149,7 +150,8 @@ class Training_app:
         """Render the screen each game loop."""
         genomes_fitnesses = [(x, genome.fitness)
                              for x, genome in enumerate(self.ge)]
-        best_fitnesses = sorted(genomes_fitnesses, key=lambda i: i[1], reverse=True)[:12]
+        best_fitnesses = sorted(
+            genomes_fitnesses, key=lambda i: i[1], reverse=True)[:12]
 
         best_snakes = [x[0] for x in best_fitnesses]
 
@@ -238,7 +240,7 @@ class Training_app:
         # Update the high score if necessary
         for snake in self.den:
             if snake.score > self.high_score:
-                with open("high_score_neat.txt", 'w') as file:
+                with open("high_scores/high_score_neat_train.txt", 'w') as file:
                     file.write(f"{snake.score}")
         # Exit pygame without errors
         for evt in pygame.event.get():
@@ -259,11 +261,12 @@ class Training_app:
         self.on_cleanup()
 
     def get_high_score(self):
-        high_score_file = "high_scores/high_score_neat.txt"
+        high_score_file = "high_scores/high_score_neat_train.txt"
         with open(high_score_file, 'r') as file:
             high_score = int(file.readline())
 
         return high_score
+
 
 def save_object(obj, filename):
     with open(filename, 'wb') as output:
@@ -287,9 +290,7 @@ def run(config_path):
 
     winner = p.run(eval_genomes, 100)
 
-    save_object(winner, "neat_snake_2.pickle")
-
-    visualize.draw_net(config, winner, view=True)
+    save_object(winner, "neat_snake_hidden.pickle")
 
 
 if __name__ == "__main__":

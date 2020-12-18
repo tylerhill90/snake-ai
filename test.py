@@ -35,6 +35,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 PURPLE = (147, 132, 240)
 
+
 class Training_app:
     """Class to house the game."""
 
@@ -136,7 +137,8 @@ class Training_app:
         """Render the screen each game loop."""
         genomes_fitnesses = [(x, genome.fitness)
                              for x, genome in enumerate(self.ge)]
-        best_fitnesses = sorted(genomes_fitnesses, key=lambda i: i[1], reverse=True)[:12]
+        best_fitnesses = sorted(
+            genomes_fitnesses, key=lambda i: i[1], reverse=True)[:12]
 
         best_snakes = [x[0] for x in best_fitnesses]
 
@@ -222,21 +224,11 @@ class Training_app:
 
     def on_cleanup(self):
         """Exit the game."""
-        """max_fit = -100
-        best_genome = 0
-        for x, genome in enumerate(self.ge):
-            if genome.fitness > max_fit:
-                max_fit = genome.fitness
-                best_genome = x
-
-        print(best_genome, max_fit)
-
-        visualize.draw_net(self.config, self.ge[best_genome], view=True)"""
 
         # Update the high score if necessary
         for snake in self.den:
             if snake.score > self.high_score:
-                with open("neat_high_score.txt", 'w') as file:
+                with open("high_scores/high_score_neat.txt", 'w') as file:
                     file.write(f"{snake.score}")
         # Exit pygame without errors
         for evt in pygame.event.get():
@@ -262,6 +254,7 @@ class Training_app:
             high_score = int(file.readline())
 
         return high_score
+
 
 def replay_genome(config_path, genome_path="neat_snake_2.pickle"):
     # Load requried NEAT config
