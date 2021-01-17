@@ -1,5 +1,5 @@
 # Snake AI
-A classic game of snake implemented with OOP. Three AIs are available to play the game as well. They are as follows:
+A classic game of snake made with [PyGame](https://www.pygame.org/news) and implemented with OOP. Three AIs are available to play the game as well. They are as follows:
 
 - A simple heuristic approach using euclidean distance to the food
 - An A* pathfinding approach combined with the simple heuristic
