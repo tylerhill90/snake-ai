@@ -3,6 +3,8 @@
 """A game of classic snake."""
 
 import sys
+import os
+import pickle
 import pygame
 from pygame.locals import (
     KEYDOWN,
@@ -18,6 +20,7 @@ from snakes.Snake import Snake
 from snakes.Simple_ai_snake import Simple_ai_snake
 from snakes.A_star_snake import A_star_snake
 from snakes.Neat_snake import Neat_snake
+from Neat_app import replay_genome
 
 # Define global constants
 CELL = 20
@@ -40,7 +43,7 @@ PURPLE = (147, 132, 240)
 class App:
     """Class to house the game."""
 
-    def __init__(self, snake, frame_rate=0):
+    def __init__(self, snake, frame_rate=50):
         pygame.init()
         self.running = True
         self.screen = pygame.display.set_mode((
@@ -48,6 +51,8 @@ class App:
         ))
         self.snake = snake
         if isinstance(self.snake, Simple_ai_snake):
+            self.frame_rate = frame_rate
+        elif isinstance(self.snake, A_star_snake):
             self.frame_rate = frame_rate
         else:
             self.frame_rate = 7
@@ -206,8 +211,44 @@ class App:
 
 
 if __name__ == "__main__":
-    # game = App(Snake(WIDTH, HEIGHT))
-    # game = App(Simple_ai_snake(WIDTH, HEIGHT))
-    game = App(A_star_snake(WIDTH, HEIGHT))
-    # game = App(Neat_snake(WIDTH, HEIGHT))
-    game.on_execute()
+    error_message = '''Please indicate which type of game to play by typing\
+ the following on execution:
+    Play    -  for a normal game of snake
+    Simple  -  for the simple AI
+    A_star  -  for the A* pathfinding AI
+    Neat    -  for the NEAT AI'''
+
+    try:
+        game = None
+        ai_type = sys.argv[1]
+        if ai_type in ['play', 'Play']:
+            game = App(Snake(WIDTH, HEIGHT))
+            print()
+            print('Press ESC key to exit.')
+            print('Press any arrow key to start the game.')
+            print()
+        elif ai_type in ['simple', 'Simple']:
+            game = App(Simple_ai_snake(WIDTH, HEIGHT))
+        elif ai_type in ['a_star', 'A_star']:
+            game = App(A_star_snake(WIDTH, HEIGHT))
+            print()
+            print('Press ESC key to exit.')
+            print('Press the space bar to turn off/on snake A* vision.')
+            print()
+        elif ai_type in ['neat', 'Neat']:
+            print()
+            print('Press ESC key to exit.')
+            print('Press the space bar to turn off/on snake vision.')
+            print()
+            genome_path = 'pickled_snakes/neat_snake_4.pickle'
+            local_dir = os.path.dirname(__file__)
+            config_path = os.path.join(local_dir, "config-feedforward.txt")
+            replay_genome(config_path, genome_path)
+        else:
+            raise ValueError(error_message)
+
+        if game:
+            game.on_execute()
+
+    except IndexError as error:
+        sys.exit(error_message)

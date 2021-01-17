@@ -85,21 +85,23 @@ class Training_app:
 
         for x, snake in enumerate(self.den):
             if snake.alive:
-                # Move the snake
                 head_1 = snake.body[0]
+
+                # Move the snake
                 snake.move_snake(self.nets[x])
                 snake.update_body()
+
                 head_2 = snake.body[0]
 
-                """# Increase fitness if closer to food and decrease otherwise
+                # Increase fitness if closer to food and decrease otherwise
                 if snake.calc_dist(head_1, snake.food) < snake.calc_dist(head_1, snake.food):
-                    self.ge[x].fitness += 0.01
+                    self.ge[x].fitness += 1
                 else:
-                    self.ge[x].fitness -= 0.015"""
+                    self.ge[x].fitness -= 1.5
 
                 """# Decrease fitness if head is near the edge of board
                 if 0 in head_2 or snake.width in head_2 or snake.height in head_2:
-                    self.ge[x].fitness -= 0.1"""
+                    self.ge[x].fitness -= 1"""
 
                 # Check if snake starves and decrease fitness if so
                 if snake.hunger >= len(snake.body) * 75:
@@ -107,15 +109,6 @@ class Training_app:
                     snake.alive = False
                     self.ge[x].fitness -= 100 / len(snake.body)
                     continue
-
-                """# Decrease fitness if stuck in a loop
-                if snake.body[0] in snake.path:
-                    snake.time_loop += 1
-                    if snake.time_loop == len(snake.path):
-                        self.ge[x].fitness -= 2
-                        snake.time_loop = 0
-                        snake.path = set()
-                snake.path.add(snake.body[0])"""
 
                 # Check lose conditions
                 if self.check_lose_conditions(snake):
@@ -150,18 +143,22 @@ class Training_app:
         """Render the screen each game loop."""
         genomes_fitnesses = [(x, genome.fitness)
                              for x, genome in enumerate(self.ge)]
-        best_fitnesses = sorted(
-            genomes_fitnesses, key=lambda i: i[1], reverse=True)[:12]
+        best_fitness = sorted(
+            genomes_fitnesses, key=lambda i: i[1], reverse=True)[:1]
 
-        best_snakes = [x[0] for x in best_fitnesses]
+        best_snake = best_fitness[0][0]
 
         # Draw a black background
         self.screen.fill(BLACK)
 
-        count = 0
+        count = 1
         for game, snake in enumerate(self.den):
-            if game in best_snakes:
+            if game == best_snake:
+                row, col = 0, 0
+                self.render_game(snake, row, col)
+            if count < 12:
                 count += 1
+
                 if count < 5:
                     row = 0
                 elif 4 < count < 9:
@@ -178,52 +175,55 @@ class Training_app:
                 else:
                     col = 3
 
-                # Draw the snake vision
-                if self.render_vision:
-                    updated_vision = [tuple(map(
-                        sum, zip(snake.direction, snake.vision[x])))
-                        for x in range(len(snake.vision))]
-                    for cell in updated_vision:
-                        self.render_cell(PURPLE, cell, row, col)
-
-                # Draw the food
-                self.render_cell(RED, snake.food, row, col)
-
-                # Draw the snake
-                for coord in snake.body:
-                    self.render_cell(GREEN, coord, row, col)
-
-                # Draw the head of the snake
-                self.render_cell(DARK_GREEN, snake.body[0], row, col)
-
-                # Draw the scoreboard background
-                pygame.draw.rect(self.screen, GREY,
-                                 [0 + col * SCREEN_WIDTH,
-                                  ((MARGIN + CELL) * HEIGHT + MARGIN) +
-                                  row * SCREEN_HEIGHT,
-                                  ((MARGIN + CELL) * WIDTH + MARGIN),
-                                  SCORE_BOARD
-                                  ])
-
-                # Store text for scores
-                current_score = self.font.render(
-                    f"Score: {snake.score}", True, BLACK)
-                if snake.score < self.high_score:
-                    high_score = self.font.render(
-                        f"High Score: {self.high_score}", True, BLACK)
-                else:
-                    high_score = self.font.render(
-                        f"High Score: {snake.score}", True, BLACK)
-
-                # Draw Scores
-                self.screen.blit(current_score, (5 + col * SCREEN_WIDTH,
-                                                 (MARGIN + CELL) * HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
-                self.screen.blit(high_score, ((((MARGIN + CELL) * WIDTH +
-                                                MARGIN) // 2) + col * SCREEN_WIDTH, (MARGIN + CELL) *
-                                              HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
+                self.render_game(snake, row, col)
 
         # Display the screen
         pygame.display.flip()
+
+    def render_game(self, snake, row, col):
+        # Draw the snake vision
+        if self.render_vision:
+            updated_vision = [tuple(map(
+                sum, zip(snake.direction, snake.vision[x])))
+                for x in range(len(snake.vision))]
+            for cell in updated_vision:
+                self.render_cell(PURPLE, cell, row, col)
+
+        # Draw the food
+        self.render_cell(RED, snake.food, row, col)
+
+        # Draw the snake
+        for coord in snake.body:
+            self.render_cell(GREEN, coord, row, col)
+
+        # Draw the head of the snake
+        self.render_cell(DARK_GREEN, snake.body[0], row, col)
+
+        # Draw the scoreboard background
+        pygame.draw.rect(self.screen, GREY,
+                         [0 + col * SCREEN_WIDTH,
+                          ((MARGIN + CELL) * HEIGHT + MARGIN) +
+                          row * SCREEN_HEIGHT,
+                          ((MARGIN + CELL) * WIDTH + MARGIN),
+                          SCORE_BOARD
+                          ])
+
+        # Store text for scores
+        current_score = self.font.render(
+            f"Score: {snake.score}", True, BLACK)
+        if snake.score < self.high_score:
+            high_score = self.font.render(
+                f"High Score: {self.high_score}", True, BLACK)
+        else:
+            high_score = self.font.render(
+                f"High Score: {snake.score}", True, BLACK)
+
+        # Draw Scores
+        self.screen.blit(current_score, (5 + col * SCREEN_WIDTH,
+                                         (MARGIN + CELL) * HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
+        self.screen.blit(high_score, ((((MARGIN + CELL) * WIDTH +
+                                        MARGIN) // 2) + col * SCREEN_WIDTH, (MARGIN + CELL) *
+                                      HEIGHT + MARGIN + 5 + row * SCREEN_HEIGHT))
 
     def render_cell(self, color, coord, row, col):
         """Render a single cell of the game board."""
@@ -288,9 +288,13 @@ def run(config_path):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    winner = p.run(eval_genomes, 100)
+    # Reset high score for training
+    with open("high_scores/high_score_neat_train.txt", "w") as file:
+        file.write("0")
 
-    save_object(winner, "neat_snake_hidden.pickle")
+    winner = p.run(eval_genomes, 400)
+
+    save_object(winner, "neat_snake_5.pickle")
 
 
 if __name__ == "__main__":

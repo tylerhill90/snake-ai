@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+"""Watch a game played by a trained NEAT AI snake.
+"""
+
 import sys
 import os
 from random import randint
@@ -19,7 +22,7 @@ from pygame.locals import (
 from snakes.Neat_snake import Neat_snake
 
 # Define global constants
-CELL = 7
+CELL = 20
 MARGIN = 1
 WIDTH = 50
 HEIGHT = 35
@@ -44,7 +47,7 @@ class Training_app:
         self.running = True
         self.render_vision = False
         self.screen = pygame.display.set_mode((
-            SCREEN_WIDTH * 4, SCREEN_HEIGHT * 3
+            SCREEN_WIDTH, SCREEN_HEIGHT
         ))
 
         self.config = config
@@ -256,7 +259,7 @@ class Training_app:
         return high_score
 
 
-def replay_genome(config_path, genome_path="neat_snake_2.pickle"):
+def replay_genome(config_path, genome_path):
     # Load requried NEAT config
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                 neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
@@ -269,10 +272,15 @@ def replay_genome(config_path, genome_path="neat_snake_2.pickle"):
     genomes = [(1, genome)]
 
     # Call game with only the loaded genome
-    Training_app(genomes, config, frame_rate=20).on_execute()
+    Training_app(genomes, config, frame_rate=75).on_execute()
 
 
 if __name__ == "__main__":
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, "config-feedforward.txt")
-    replay_genome(config_path)
+    try:
+        genome_path = sys.argv[1]
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, "config-feedforward.txt")
+        replay_genome(config_path, genome_path)
+    except (IndexError, FileNotFoundError):
+        print("Please provide a valid pickled snake genome file.")
+        sys.exit()
