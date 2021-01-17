@@ -1,14 +1,22 @@
 # Snake
-A classic game of snake implemented with OOP. Three artificial intelligences have been designed to play the game as well; a simple heuristic approach, an A* pathfinding approach, and a machine learning model using NEAT (still to come). See below for more information on each of these.
+A classic game of snake implemented with OOP. Three AIs have been implemented to play the game as well. They are as follows:
 
-To play or see an AI play run [App.py](./App.py) and comment out which version you would like to run at the bottom of the file.
+- A simple heuristic approach using euclidean distance to the food
+- An A* pathfinding approach combined with the simple heuristic
+- A machine learning model approach that uses [NEAT](http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) via the [neat-python](https://neat-python.readthedocs.io/en/latest/) module
 
-Eat as many pieces of red food before you either run into the edge of the screen or hit yourself. Use the arrow keys to change direction. Hit the escape key to exit. Pause by hitting the spacebar and unpause by hitting any other key.
+To play or see an AI play run the [App.py](./App.py) script with the following options:
 
-![Screenshot](static/snake_screenshot.png)
+- play
+- simple
+- a_star
+- neat
 
-# Simple AI
+Example:
+```
+./App.py neat
+```
 
-# A* Pathfinding AI
+Below are examples of the A* and NEAT AIs in progress. You can turn on the snake's "vision", the purple lines, by pressing the space bar when App.py is running. The A* snake has purple vision that finds the shortest path to the food while the NEAT snake's vision looks in straight lines around its head.
 
-# NEAT AI
+![Screenshot](static/example.gif)
