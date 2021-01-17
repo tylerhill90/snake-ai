@@ -1,4 +1,4 @@
-# Snake
+# Snake AI
 A classic game of snake implemented with OOP. Three AIs have been implemented to play the game as well. They are as follows:
 
 - A simple heuristic approach using euclidean distance to the food
